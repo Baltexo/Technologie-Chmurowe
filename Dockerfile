@@ -1,18 +1,31 @@
-# Obraz bazowy Ubuntu 
-FROM ubuntu:latest
+FROM alpine AS builder
 
-LABEL author="Bartosz Kierepka <Bartoszkierepka@outlook.com>"
+ARG VERSION
+ENV APP_VERSION=$VERSION
 
-RUN apt-get update && \
-    apt-get upgrade -y && \
-    DEBIAN_FRONTEND=noninteractive apt-get install -y apache2 && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+WORKDIR /app
 
-COPY index.html /var/www/html/index.html
+# strona HTML
+RUN echo "<html> <body style='font-family: sans-serif; text-align: center;'> " > index.html && \
+    echo "<h1>Laboratorium 5 - TCh</h1>" >> index.html && \
+    echo "<p><strong>Wersja aplikacji:</strong> ${APP_VERSION}</p>" >> index.html && \
+    echo "<p><strong>Hostname:</strong> REPLACE_HOSTNAME</p>" >> index.html && \
+    echo "<p><strong>Adres IP:</strong> REPLACE_IP</p>" >> index.html && \
+    echo "</body> </html>" >> index.html
 
-# Informacja o porcie
+FROM nginx:alpine
+
 EXPOSE 80
 
-# Uruchomienie serwera
-CMD ["apachectl", "-D", "FOREGROUND"]
+COPY --from=builder /app/index.html /usr/share/nginx/html/index.html
+
+RUN apk add --no-cache curl
+
+# healthcheck
+HEALTHCHECK --interval=10s --timeout=3s \
+  CMD curl -f http://localhost/ || exit 1
+
+CMD ["/bin/sh", "-c", \
+     "sed -i \"s/REPLACE_HOSTNAME/$(hostname)/g\" /usr/share/nginx/html/index.html && \
+      sed -i \"s/REPLACE_IP/$(hostname -i)/g\" /usr/share/nginx/html/index.html && \
+      nginx -g 'daemon off;'"]
