@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Pogoda</title>
+</head>
+<body>
+    <div class="box">
+        <h2>Aplikacja Pogodowa</h2>
+        <p>Autor: {{ author }}</p>
+        <form method="POST">
+            <input type="text" name="city" placeholder="Wpisz miasto:" required>
+            <button type="submit">Sprawdź pogodę</button>
+        </form>
+
+        {% if weather %}
+            <hr>
+            <h3>Pogoda w: {{ weather.name }}</h3>
+            <p>Temperatura: {{ weather.main.temp }}°C</p>
+            <p>Opis: {{ weather.weather[0].description }}</p>
+        {% endif %}
+    </div>
+</body>
+</html>
