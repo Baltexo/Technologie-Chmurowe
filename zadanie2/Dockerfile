@@ -1,12 +1,13 @@
-FROM python:3.10-alpine
+FROM python:3.10-alpine AS builder
 
 WORKDIR /app
 
-#Optymalizacja cache
+RUN apk add --no-cache gcc musl-dev linux-headers
+
 COPY requirements.txt .
 RUN pip install --user --no-cache-dir -r requirements.txt
 
-FROM python:3.11-slim
+FROM python:3.10-alpine
 
 LABEL org.opencontainers.image.authors="Bartosz Kierepka"
 
@@ -17,9 +18,8 @@ COPY . .
 
 ENV PATH=/root/.local/bin:$PATH
 
-#HEALTHCHECK
 HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
-  CMD curl -f http://localhost:5000/ || exit 1
+  CMD wget --no-verbose --tries=1 --spider http://localhost:5000/ || exit 1
 
 EXPOSE 5000
 
