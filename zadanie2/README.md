@@ -3,15 +3,16 @@ a)W potoku wdrożeniowym wykorzystano oficjalne akcje docker/setup/qemu-action o
 b)Skonfigurowano optymalizację procesu budowania przy użyciu dedykowanego mechanizmu cache dla Docker Buildx. Dane pamięci podręcznej są pobierane i wysyłane do zewnętrznego, publicznego rejestru na Docker Hubie autora. Wykorzystano do tego eksporter typu registry
 
 c)Do weryfikacji bezpieczeństwa kodu wybrano skaner Trivy od Aqua Security. Potok najpierw buduje lokalny obraz testowy, po czym Trivy skanuje go pod kątem luk bezpieczeństwa. Zgodnie z wytycznymi, skaner został zintegrowany tak, aby raportować wykryte luki w czytelnej tabeli w logach systemu GitHub Actions. 
+Konfiguracja w środowisku GitHub Actions jest bardzo prosta za pomocą gotowej akcji, która nie wymaga zakładania dodatkowych kont czy generowania dedykowanych tokenów, jak ma to miejsce w przypadku Docker Scout.
 
-Przyjęty sposób tagowania
+Przyjęty sposób tagowania:
 
 1. Tagowanie obrazu końcowego 
 Mój obraz wysyłany na GitHub Packages (ghcr.io/baltexo/zadanie2-app) dostaje automatycznie dwa tagi:
 1.latest – żeby zawsze było wiadomo, która wersja jest najnowsza i przetestowana
-2.github.sha` – czyli unikalny, długi ciąg znaków ) konkretnego commita z Gita
+2.github.sha – czyli unikalny, długi ciag znaków konkretnego commita z Gita
 
-Dlaczego tak? Używanie samego tagu latest na produkcji to kiepski pomysł, bo można przypadkowo nadpisać działającą wersję i stracić kontrolę nad tym, co dokładnie działa na serwerze. Dodanie tagu z hashem commita gwarantuje powtarzalność. W razie wtopy dokładnie wiem, który commit odpowiada danej wersji kontenera i mogę jednym kliknięciem zrobić szybki powrót do starszej, stabilnej wersji.
+Dlaczego tak? Używanie samego tagu latest na produkcji to kiepski pomysł, bo można przypadkowo nadpisać działającą wersję i stracić kontrolę nad tym, co dokładnie działa na serwerze. Dodanie tagu z hashem commita gwarantuje powtarzalność. W razie wtopy dokładnie wiem, który commit odpowiada danej wersji kontenera i mogę jednym kliknięciem zrobic szybki powrót do starszej, stabilnej wersji.
 
 2. Tagowanie pamięci podręcznej
 Wszystkie warstwy cache na moim Docker Hubie lądują pod jednym stałym tagiem cache
